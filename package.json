@@ -1,0 +1,14 @@
+{
+    "name": "com.nukadelic.animationtexturebaker",
+    "displayName": "Animation Texture Baker",
+    "description" : "Bake animation vertex data into textures",
+    "version": "1.0",
+    "license": "MIT",
+    "unity": "2021.3",
+    "dependencies": {
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/nukadelic/AnimationTextureBaker.git"
+    }
+}
