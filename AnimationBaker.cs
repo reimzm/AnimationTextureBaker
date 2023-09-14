@@ -43,7 +43,7 @@ public class AnimationBaker : MonoBehaviour
 
     [Range(2,12)] public int FrameResolution = 4;
 
-    public string saveToFolder = "AnimationBakerTextures";
+    public string saveToFolder = "AnimationBakerOutput";
 
     public bool createPrefabs = false;
 
