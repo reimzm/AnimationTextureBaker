@@ -1,3 +1,6 @@
+
+https://github.com/nukadelic/AnimationTextureBaker/blob/master/Img~/Unity_TnP5YSO6ol.mp4
+
 # Installation 
 
 Edit the `manifest.json` file located in the `Packages` folder of your unity project and
