@@ -54,6 +54,7 @@ public class AnimationBaker : MonoBehaviour
 
     [Header("Transform")]
     public Vector3 rotate = Vector3.zero;
+    public float boundsScale = 1;
 
     int GetFrameCount( AnimationClip clip )
     {
@@ -195,6 +196,8 @@ public class AnimationBaker : MonoBehaviour
             if (!collpaseMesh && optimizeMeshOnSave) MeshUtility.Optimize(defaultMesh);
             if(collpaseMesh && defaultMesh.vertexCount > 2)
             {
+                var newVerts = new Vector3[ defaultMesh.vertexCount ];
+
                 defaultMesh.vertices.ToList().ForEach( v => { 
                     min.x = Mathf.Min(v.x, min.x);
                     min.y = Mathf.Min(v.y, min.y);
@@ -203,12 +206,14 @@ public class AnimationBaker : MonoBehaviour
                     max.y = Mathf.Max(v.y, max.y);
                     max.z = Mathf.Max(v.z, max.z);
                 } );
-                var newVerts = new Vector3[ defaultMesh.vertexCount ];
                 newVerts[0] = new Vector3( min.x, min.y, min.z );
                 newVerts[1] = new Vector3( max.x, max.y, max.z );
+                
                 defaultMesh.SetVertices( newVerts );
                 defaultMesh.RecalculateBounds();
             }
+                
+            defaultMesh.bounds = new Bounds( defaultMesh.bounds.center, defaultMesh.bounds.size * boundsScale );
 
             AssetDatabase.CreateAsset( defaultMesh, meshAssetPath );
             AssetDatabase.SaveAssets();
