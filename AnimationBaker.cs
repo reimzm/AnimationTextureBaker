@@ -187,10 +187,28 @@ public class AnimationBaker : MonoBehaviour
 
         if (createMeshAsset)
         {
+            Vector3 min = new Vector3(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity);
+            Vector3 max = new Vector3(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity);
+
             var meshAssetPath = Path.Combine(subFolderPath, $"{FixPath(name)}.mesh" + ".asset");
             defaultMesh = Instantiate(defaultMesh);
             if (!collpaseMesh && optimizeMeshOnSave) MeshUtility.Optimize(defaultMesh);
-            if(collpaseMesh) defaultMesh.SetVertices( new Vector3[ defaultMesh.vertexCount ] );
+            if(collpaseMesh && defaultMesh.vertexCount > 2)
+            {
+                defaultMesh.vertices.ToList().ForEach( v => { 
+                    min.x = Mathf.Min(v.x, min.x);
+                    min.y = Mathf.Min(v.y, min.y);
+                    min.z = Mathf.Min(v.z, min.z);
+                    max.x = Mathf.Max(v.x, max.x);
+                    max.y = Mathf.Max(v.y, max.y);
+                    max.z = Mathf.Max(v.z, max.z);
+                } );
+                var newVerts = new Vector3[ defaultMesh.vertexCount ];
+                newVerts[0] = new Vector3( min.x, min.y, min.z );
+                newVerts[1] = new Vector3( max.x, max.y, max.z );
+                defaultMesh.SetVertices( newVerts );
+            }
+
             AssetDatabase.CreateAsset( defaultMesh, meshAssetPath );
             AssetDatabase.SaveAssets();
             defaultMesh = AssetDatabase.LoadAssetAtPath<Mesh>( meshAssetPath );
