@@ -2,7 +2,7 @@
     "name": "com.nukadelic.animationtexturebaker",
     "displayName": "Animation Texture Baker",
     "description" : "Bake animation vertex data into textures",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "license": "MIT",
     "unity": "2021.3",
     "dependencies": {
