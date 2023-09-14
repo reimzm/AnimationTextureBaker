@@ -2,7 +2,7 @@
 
 Bake vertex data into texture2d images via compute shader, then use a shader interpolate between vertex position to animate the mesh verticies 
 
-![Check out this MP4](https://raw.githubusercontent.com/nukadelic/AnimationTextureBaker/master/Img%7E/Unity_TnP5YSO6ol.mp4)
+https://github.com/nukadelic/AnimationTextureBaker/assets/6582633/8f15c948-c2ab-439a-bff6-60b94e9046c0
 
 ## Installation 
 
@@ -27,3 +27,6 @@ add the follwing line to the list of `dependencies`:
 * If you want to bake only one animation remove other clips and keep only 1 clip in the component "clips" list
 * Collapse mesh checkbox will basically designed to protect your 3d models if someone would to reverse engineer the build application
     
+## The vertex shader
+
+![image](https://github.com/nukadelic/AnimationTextureBaker/assets/6582633/1c3077cb-ac49-49f3-8177-fad51406a3c2)
