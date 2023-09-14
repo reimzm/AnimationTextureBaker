@@ -207,6 +207,7 @@ public class AnimationBaker : MonoBehaviour
                 newVerts[0] = new Vector3( min.x, min.y, min.z );
                 newVerts[1] = new Vector3( max.x, max.y, max.z );
                 defaultMesh.SetVertices( newVerts );
+                defaultMesh.RecalculateBounds();
             }
 
             AssetDatabase.CreateAsset( defaultMesh, meshAssetPath );
