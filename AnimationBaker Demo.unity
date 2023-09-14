@@ -746,6 +746,7 @@ MonoBehaviour:
   createMeshAsset: 1
   optimizeMeshOnSave: 0
   collpaseMesh: 1
+  rotate: {x: 0, y: 0, z: 0}
 --- !u!111 &722828227
 Animation:
   m_ObjectHideFlags: 0

@@ -52,6 +52,9 @@ public class AnimationBaker : MonoBehaviour
     [Tooltip("Make it a bit harder to reverse engenieer this model")]
     public bool collpaseMesh = false;
 
+    [Header("Transform")]
+    public Vector3 rotate = Vector3.zero;
+
     int GetFrameCount( AnimationClip clip )
     {
         return Mathf.NextPowerOfTwo( ( int ) ( clip.length * ( ( int ) FrameResolution ) ) );
@@ -249,6 +252,7 @@ public class AnimationBaker : MonoBehaviour
             infoTexGen.SetTexture(kernel, "OutPosition", pRt);
             infoTexGen.SetTexture(kernel, "OutNormal", nRt);
             infoTexGen.SetTexture(kernel, "OutTangent", tRt);
+            infoTexGen.SetVector("RotateEuler", rotate);
             infoTexGen.Dispatch(kernel, vCount / (int)x + 1, frames / (int)y + 1, 1);
 
             buffer.Release();

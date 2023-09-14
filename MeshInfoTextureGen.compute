@@ -14,14 +14,43 @@ RWTexture2D<float4> OutNormal;
 RWTexture2D<float4> OutTangent;
 StructuredBuffer<MeshInfo> Info;
 int VertCount;
+float3 RotateEuler;
+
+
+float3 RotateAboutAxis(float3 In, float3 Axis, float Rotation )
+{
+    // https://docs.unity3d.com/Packages/com.unity.shadergraph@14.0/manual/Rotate-About-Axis-Node.html
+
+    Rotation = radians(Rotation);
+    float s = sin(Rotation), c = cos(Rotation), c1 = 1.0 - c;
+    Axis = normalize(Axis);
+    float3x3 rot_mat = { 
+        c1 * Axis.x * Axis.x + c, c1 * Axis.x * Axis.y - Axis.z * s, c1 * Axis.z * Axis.x + Axis.y * s,
+        c1 * Axis.x * Axis.y + Axis.z * s, c1 * Axis.y * Axis.y + c, c1 * Axis.y * Axis.z - Axis.x * s,
+        c1 * Axis.z * Axis.x - Axis.y * s, c1 * Axis.y * Axis.z + Axis.x * s, c1 * Axis.z * Axis.z + c
+    };
+    return mul( rot_mat, In );
+}
+
+float3 Rotate(float3 In, float3 Euler )
+{
+    float3 Out = RotateAboutAxis(In, float3(1, 0, 0), Euler.x );
+    Out = RotateAboutAxis(Out, float3(0, 1, 0), Euler.y);
+    return RotateAboutAxis(Out, float3(0, 0, 1), Euler.z);
+}
+
 
 [numthreads(8,8,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
 	int index = id.y * VertCount + id.x;
 	MeshInfo info = Info[index];
+    
+    float3 p = Rotate( info.position , RotateEuler );
+    float3 n = Rotate( info.normal   , RotateEuler );
+    float3 t = Rotate( info.tangent  , RotateEuler );
 
-	OutPosition[id.xy] = float4(info.position, 1.0);
-	OutNormal[id.xy] = float4(info.normal, 1.0);
-	OutTangent[id.xy] = float4(info.tangent, 1.0);
+	OutPosition[ id.xy ]  = float4(p, 1.0 );
+	OutNormal[ id.xy ]    = float4(n, 1.0);
+	OutTangent[ id.xy ]   = float4(t, 1.0);
 }
