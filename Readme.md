@@ -1,7 +1,10 @@
+# Animation Texture Baker 
 
-https://github.com/nukadelic/AnimationTextureBaker/blob/master/Img~/Unity_TnP5YSO6ol.mp4
+Bake vertex data into texture2d images via compute shader, then use a shader interpolate between vertex position to animate the mesh verticies 
 
-# Installation 
+![Check out this MP4](https://raw.githubusercontent.com/nukadelic/AnimationTextureBaker/master/Img%7E/Unity_TnP5YSO6ol.mp4)
+
+## Installation 
 
 Edit the `manifest.json` file located in the `Packages` folder of your unity project and
 add the follwing line to the list of `dependencies`:
