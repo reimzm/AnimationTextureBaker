@@ -9,7 +9,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 100000, guid: a85d92b72304a79449904f3b49e3d5ea, type: 3}
       propertyPath: m_Name
-      value: Horse_Animation Variant
+      value: Horse BakeExample
       objectReference: {fileID: 0}
     - target: {fileID: 100000, guid: a85d92b72304a79449904f3b49e3d5ea, type: 3}
       propertyPath: m_IsActive
@@ -823,5 +823,54 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: 38667ff2bdc210347be8e7b512bfd0f4, type: 2}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 9500000, guid: a85d92b72304a79449904f3b49e3d5ea, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: a85d92b72304a79449904f3b49e3d5ea, type: 3}
+--- !u!1 &4390495077856217299 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 100000, guid: a85d92b72304a79449904f3b49e3d5ea, type: 3}
+  m_PrefabInstance: {fileID: 4390495077856251507}
+  m_PrefabAsset: {fileID: 0}
+--- !u!111 &1764663322
+Animation:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4390495077856217299}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Animation: {fileID: 7400000, guid: 2c3a41693ca64e44ca35382a8fe0f176, type: 2}
+  m_Animations:
+  - {fileID: 7400000, guid: 2c3a41693ca64e44ca35382a8fe0f176, type: 2}
+  m_WrapMode: 0
+  m_PlayAutomatically: 1
+  m_AnimatePhysics: 0
+  m_CullingType: 0
+--- !u!114 &1764663321
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4390495077856217299}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0feb26e03bb9534296d0ca236848adf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  infoTexGen: {fileID: 7200000, guid: c6bbf99e5edb32d41b103202a8f10653, type: 3}
+  playShader: {fileID: -6465566751694194690, guid: b2725b7868608ea4d8fea97d0da77458, type: 3}
+  clips:
+  - {fileID: 7400000, guid: 4fcc549270581d141acb121571677df6, type: 2}
+  - {fileID: 7400000, guid: 2c3a41693ca64e44ca35382a8fe0f176, type: 2}
+  - {fileID: 7400000, guid: df6acb88ddd666d4fa37e12084965601, type: 2}
+  FrameResolution: 4
+  saveToFolder: AnimationBakerTextures
+  createPrefabs: 1
+  createMeshAsset: 1
+  optimizeMeshOnSave: 0
+  collpaseMesh: 1
+  combineTextures: 0
+  rotate: {x: 0, y: 0, z: 0}
+  boundsScale: 1

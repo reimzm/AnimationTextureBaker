@@ -13,6 +13,18 @@ public class AnimationBaker : MonoBehaviour
 
     public ComputeShader infoTexGen;
     public Shader playShader;
+
+
+    public class ShaderKeywords
+    {
+        public string MainTextName = "_MainTex";
+        public string VertexDataPositions = "_PosTex";
+        public string VertexDataNormals = "_NmlTex";
+        public string VertexDataTangents = "_TanTex";
+    }
+
+    public ShaderKeywords shaderKeywords = new ShaderKeywords();
+
     public AnimationClip[] clips;
 
     public struct VertInfo
@@ -51,6 +63,9 @@ public class AnimationBaker : MonoBehaviour
     public bool optimizeMeshOnSave = false;
     [Tooltip("Make it a bit harder to reverse engenieer this model")]
     public bool collpaseMesh = false;
+
+    [Tooltip("Combine multiple clip textures into one with a duplicate first row at every clip end")]
+    public bool combineTextures = false;
 
     [Header("Transform")]
     public Vector3 rotate = Vector3.zero;
@@ -167,9 +182,15 @@ public class AnimationBaker : MonoBehaviour
         return validPath.Trim();
     }
 
+    Texture2D[] bakedTexturesPos;
+    Texture2D[] bakedTexturesNorm;
+    Texture2D[] bakedTexturesTan;
+
     [ContextMenu("bake texture")]
     void Bake()
     {
+        bool bake_combined = combineTextures && clips.Length > 1;
+
         var skin = GetComponentInChildren<SkinnedMeshRenderer>();
         var defaultMesh = skin.sharedMesh;
         var vCount = skin.sharedMesh.vertexCount;
@@ -222,6 +243,13 @@ public class AnimationBaker : MonoBehaviour
 
         int clip_index = -1;
 
+        if( bake_combined )
+        {
+            bakedTexturesPos = new Texture2D[ clips.Length ];
+            bakedTexturesNorm = new Texture2D[ clips.Length ];
+            bakedTexturesTan = new Texture2D[ clips.Length ];
+        }
+
         foreach (var clip in clips)
         {
             clip_index ++ ;
@@ -234,11 +262,11 @@ public class AnimationBaker : MonoBehaviour
             // var frame_name = GetFrameResName();
 
             var pRt = new RenderTexture(texWidth, frames, 0, RenderTextureFormat.ARGBHalf);
-            pRt.name = $"{name}.textPos.{clip.name}.{frames}F";
+            pRt.name = $"{name}.tex2D.Pos.{clip.name}.{frames}F";
             var nRt = new RenderTexture(texWidth, frames, 0, RenderTextureFormat.ARGBHalf);
-            nRt.name = $"{name}.texNorm.{clip.name}.{frames}F";
+            nRt.name = $"{name}.tex2D.Norm.{clip.name}.{frames}F";
             var tRt = new RenderTexture(texWidth, frames, 0, RenderTextureFormat.ARGBHalf);
-            tRt.name = $"{name}.texTan.{clip.name}.{frames}F";
+            tRt.name = $"{name}.tex2D.Tan.{clip.name}.{frames}F";
             foreach (var rt in new[] { pRt, nRt, tRt })
             {
                 rt.enableRandomWrite = true;
@@ -289,49 +317,175 @@ public class AnimationBaker : MonoBehaviour
             Graphics.CopyTexture(nRt, normTex);
             Graphics.CopyTexture(tRt, tanTex);
 
+            if( bake_combined )
+            {
+                bakedTexturesPos[ clip_index ] = posTex;
+                bakedTexturesNorm[ clip_index ] = normTex;
+                bakedTexturesTan[ clip_index ] = tanTex;
+            }
+
+            else
+            {
+                var mat = new Material( playShader );
+
+                mat.SetTexture( shaderKeywords.MainTextName ,           skin.sharedMaterial.mainTexture );
+                mat.SetTexture( shaderKeywords.VertexDataPositions ,    posTex);
+                mat.SetTexture( shaderKeywords.VertexDataNormals ,      normTex);
+                mat.SetTexture( shaderKeywords.VertexDataTangents ,     tanTex);
+
+                //mat.SetFloat("_Length", clip.length);
+                //
+                //if (clip.wrapMode == WrapMode.Loop)
+                //{
+                //    mat.SetFloat("_Loop", 1f);
+                //    mat.EnableKeyword("ANIM_LOOP");
+                //}
+
+                var pRt_path = Path.Combine(subFolderPath,FixPath(pRt.name) + ".asset");
+                var nRt_path = Path.Combine(subFolderPath,FixPath(nRt.name) + ".asset");
+                var tRt_path = Path.Combine(subFolderPath,FixPath(tRt.name) + ".asset");
+
+                AssetDatabase.CreateAsset(posTex,   pRt_path);
+                AssetDatabase.CreateAsset(normTex,  nRt_path);
+                AssetDatabase.CreateAsset(tanTex,   tRt_path);
+
+                var mat_path = Path.Combine( subFolderPath, $"{FixPath(name)}.mat.{FixPath(clip.name)}.{frames}F.asset");
+
+                AssetDatabase.CreateAsset(mat, mat_path );
+
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
+
+                if ( createPrefabs )
+                {
+                    var go = new GameObject(name + "." + clip.name);
+
+                    go.transform.position = transform.position + Vector3.left * ( clip_index + 1 );
+                
+                    go.AddComponent<MeshRenderer>().sharedMaterial = mat;
+                    go.AddComponent<MeshFilter>().sharedMesh = defaultMesh;
+            
+                    PrefabUtility.SaveAsPrefabAssetAndConnect( go, Path.Combine( folderPath, FixPath( go.name ) + ".prefab") , InteractionMode.AutomatedAction );
+                }
+
+                Selection.activeObject = mat;
+            }
+
+        }
+        
+        if ( bake_combined )
+        {
+            var combined_tex_P = CombineTextures( bakedTexturesPos  , "Pos" );
+            var combined_tex_N = CombineTextures( bakedTexturesNorm , "Nor" );
+            var combined_tex_T = CombineTextures( bakedTexturesTan  , "Tan" );
+
+            Texture2D CombineTextures( Texture2D[] textures , string n )
+            {
+                int w = textures[ 0 ].width;
+                var f = textures[ 0 ].format;
+
+                int total_height = 0;
+
+                for( var i = 0; i < textures.Length; ++i )
+                    total_height += textures[ i ].height + 1; // extra pixel space for duplicate first row for each clip 
+
+                var output = new Texture2D( w , total_height, f , false );
+
+                int y = 0;
+
+                for ( var i = 0; i < textures.Length; ++i )
+                {
+                    // ...
+
+                    var t = textures[ i ];
+
+                    int h = t.height;
+                    
+                    Graphics.CopyTexture( t, 0, 0, 0, 0, w, h, output, 0, 0, 0, y );
+
+                    y += h;
+
+                    // duplicate first row 
+
+                    Graphics.CopyTexture( t, 0, 0, 0, 0, w, 1, output, 0, 0, 0, y );
+
+                    y += 1;
+                }
+
+                var path = Path.Combine( subFolderPath, $"{FixPath(name)}.tex2D.Combined_{n}.asset" );
+
+                AssetDatabase.CreateAsset( output , path );
+
+                return output;
+            }
+
+            // .. 
+
+            AnimationCombinedFrames frame_data = null;
+
+            {
+                frame_data = ScriptableObject.CreateInstance<AnimationCombinedFrames>();
+
+                frame_data.data = new AnimationCombinedFrames.FrameTimings[ bakedTexturesPos.Length ];
+
+                int frame_offset = 0;
+
+                for ( var i = 0; i < bakedTexturesPos.Length; ++i )
+                {
+                    var clip = clips[i];
+
+                    int frame_count = GetFrameCount(clip);
+
+                    frame_data.data[ i ] = new AnimationCombinedFrames.FrameTimings
+                    {
+                        name = FixPath(clip.name),
+                        duration = 1,
+                        frames = frame_count,
+                        offset = frame_offset
+                    };
+
+                    frame_offset += frame_count + 1; // increment by previous frame count and +1 for extra row 
+                }
+
+                var path = Path.Combine(subFolderPath, $"{FixPath(name)}.framedata.asset");
+
+                AssetDatabase.CreateAsset( frame_data , path );
+
+                Selection.activeObject = frame_data;
+            }
+
             var mat = new Material( playShader );
 
-            mat.SetTexture("_MainTex", skin.sharedMaterial.mainTexture );
-            mat.SetTexture("_PosTex", posTex);
-            mat.SetTexture("_NmlTex", normTex);
+            mat.SetTexture( shaderKeywords.MainTextName ,           skin.sharedMaterial.mainTexture );
+            mat.SetTexture( shaderKeywords.VertexDataPositions ,    combined_tex_P );
+            mat.SetTexture( shaderKeywords.VertexDataNormals ,      combined_tex_N );
+            mat.SetTexture( shaderKeywords.VertexDataTangents ,     combined_tex_T );
 
-            //mat.SetFloat("_Length", clip.length);
-            //
-            //if (clip.wrapMode == WrapMode.Loop)
-            //{
-            //    mat.SetFloat("_Loop", 1f);
-            //    mat.EnableKeyword("ANIM_LOOP");
-            //}
+            var mat_path = Path.Combine(subFolderPath, $"{FixPath(name)}.combined.mat.asset");
 
-            var pRt_path = Path.Combine(subFolderPath,FixPath(pRt.name) + ".asset");
-            var nRt_path = Path.Combine(subFolderPath,FixPath(nRt.name) + ".asset");
-            var tRt_path = Path.Combine(subFolderPath,FixPath(tRt.name) + ".asset");
-
-            AssetDatabase.CreateAsset(posTex,   pRt_path);
-            AssetDatabase.CreateAsset(normTex,  nRt_path);
-            AssetDatabase.CreateAsset(tanTex,   tRt_path);
-
-            var mat_path = Path.Combine( subFolderPath, $"{FixPath(name)}.mat.{FixPath(clip.name)}.{frames}F.asset");
-
-            AssetDatabase.CreateAsset(mat, mat_path );
-
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
+            AssetDatabase.CreateAsset( mat, mat_path );
 
             if ( createPrefabs )
             {
-                var go = new GameObject(name + "." + clip.name);
+                var go = new GameObject( name + ".combined" );
 
-                go.transform.position = transform.position + Vector3.left * ( clip_index + 1 );
-                
+                go.transform.position = transform.position + Vector3.left * ( 1.0f );
+
                 go.AddComponent<MeshRenderer>().sharedMaterial = mat;
                 go.AddComponent<MeshFilter>().sharedMesh = defaultMesh;
-            
-                PrefabUtility.SaveAsPrefabAssetAndConnect( go, Path.Combine( folderPath, FixPath( go.name ) + ".prefab") , InteractionMode.AutomatedAction );
+                go.AddComponent<AnimationFramePlayer>().frameData = frame_data;
+
+                PrefabUtility.SaveAsPrefabAssetAndConnect(go, Path.Combine(folderPath, FixPath(go.name) + ".prefab"), InteractionMode.AutomatedAction);
+
+                Selection.activeObject = go;
             }
 
-            Selection.activeObject = mat;
+            else Selection.activeObject = mat;
         }
+
+        bakedTexturesPos = null;
+        bakedTexturesNorm = null;
+        bakedTexturesTan = null;
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
@@ -340,13 +494,27 @@ public class AnimationBaker : MonoBehaviour
 
     // Convert asset files to png 
 
-    [MenuItem("Custom/tex2png")]
+    [MenuItem("Tools/Convert/Selected texture .asset To .PNG")]
     public static void SaveSelection()
     {
-        var tex = (Texture2D)Selection.activeObject;
-        if (tex == null) return;
-        var pngData = tex.EncodeToPNG();
-        System.IO.File.WriteAllBytes(Application.dataPath + "/tex.png", pngData);
+        var tex = (Texture2D) Selection.activeObject;
+
+        if (tex == null)
+        {
+            Debug.LogError("Selected object is Null or not a Texture2D type");
+            return;
+        }
+
+        var path = Directory.GetParent(Application.dataPath).ToString(); // project path folder without the 'Assets' folder 
+
+        path = Path.Combine( path , AssetDatabase.GetAssetPath( tex ) ); // combine with selected asset relative path ( which allready includes 'Assets' folder )
+
+        path = Path.ChangeExtension(path, "png"); // .asset to .png
+
+        System.IO.File.WriteAllBytes( path , tex.EncodeToPNG() );
+
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
     }
 
 #endif
