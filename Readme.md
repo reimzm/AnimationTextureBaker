@@ -19,6 +19,7 @@ add the follwing line to the list of `dependencies`:
 * Attach compute shader assest "MeshInfoTextureGen"  to the InfoTexGen filed on the component
 * Use any shader that supports vertex animations , or use the demo one : "AnimationBaker_Example" in the root of this plugin folder
 * Finally press Bake button 
+( see 'Horse Bake Example' prefabs for reference ) 
 
 ## Settings & Info 
 * The baked assets will be saved inside the target folder ( "Save To Folder" field on the component ) and inside that folder it will create a subfolder with the same name as the current active game object. Same applies to any generated assets , the game object name will be the prefix for all the names , keep that in mind if you like to keep your stuff organized
@@ -30,3 +31,13 @@ add the follwing line to the list of `dependencies`:
 ## The vertex shader
 
 ![image](https://github.com/nukadelic/AnimationTextureBaker/assets/6582633/1c3077cb-ac49-49f3-8177-fad51406a3c2)
+
+
+## [Update] Added combined bake option 
+* bake all animations in a single texture
+* Custom shader for playback
+* Generated scriptable object with each animation frame time data
+* Example Mono player ( when baked with gneerated prefab option , will auto attach the demo script )
+
+https://github.com/nukadelic/AnimationTextureBaker/assets/6582633/857aa5a4-979c-4d82-a6cc-3697427c74bd
+
