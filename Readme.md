@@ -9,7 +9,7 @@ https://github.com/nukadelic/AnimationTextureBaker/assets/6582633/8f15c948-c2ab-
 Edit the `manifest.json` file located in the `Packages` folder of your unity project and
 add the follwing line to the list of `dependencies`:
 ```json
-"com.nukadelic.animationtexturebaker": "https://github.com/nukadelic/AnimationTextureBaker.git"
+"com.nukadelic.animationtexturebaker": "https://github.com/reimzm/AnimationTextureBaker.git"
 ```
 
 ## How to bake :
