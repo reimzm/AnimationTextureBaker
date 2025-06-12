@@ -1,5 +1,5 @@
 {
-    "name": "com.nukadelic.animationtexturebaker",
+    "name": "com.reimzm.animationtexturebaker",
     "displayName": "Animation Texture Baker",
     "description" : "Bake animation vertex data into textures",
     "version": "1.1.1",
@@ -11,6 +11,6 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/nukadelic/AnimationTextureBaker.git"
+        "url": "https://github.com/reimzm/AnimationTextureBaker.git"
     }
 }
