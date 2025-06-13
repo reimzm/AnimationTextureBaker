@@ -11,6 +11,7 @@ https://github.com/nukadelic/AnimationTextureBaker/assets/6582633/8f15c948-c2ab-
 ## Update
 
 Add the dependencies for the shader Graph and URP, as well as create a new Lit Play Shader based on them.
+
 https://github.com/user-attachments/assets/99398ce4-b232-418d-8ba0-13bf60745d0f
 
 ## Installation 
