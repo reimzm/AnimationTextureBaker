@@ -17,13 +17,13 @@ public class AnimationBaker : MonoBehaviour
 
     public class ShaderKeywords
     {
-        public string MainTextName = "_MainTex";
+        public string MainTextName = "_Base_Map";
         public string VertexDataPositions = "_PosTex";
         public string VertexDataNormals = "_NmlTex";
         public string VertexDataTangents = "_TanTex";
     }
 
-    public ShaderKeywords shaderKeywords = new ShaderKeywords();
+    public ShaderKeywords shaderKeywords =new ShaderKeywords();
 
     public AnimationClip[] clips;
 
